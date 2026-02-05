@@ -54,6 +54,7 @@
     <button id="sphere">SPHERE</button>
     <button id="helix">DOUBLE HELIX</button>
     <button id="grid">GRID (5x4x10)</button>
+    <button id="pyramid">PYRAMID</button>
   </div>
 
   <script type="module">
@@ -65,7 +66,8 @@
 
     let camera, scene, renderer, controls;
     const objects = [];
-    const targets = { table: [], sphere: [], helix: [], grid: [] };
+    const targets = { table: [], sphere: [], helix: [], grid: [], pyramid: [] };
+
 
     // ---------------- Google Login ----------------
     window.onload = function() {
@@ -131,7 +133,6 @@
         scene.add(objectCSS);
         objects.push(objectCSS);
 
-        // TABLE layout
         const objTable = new THREE.Object3D();
         objTable.position.x = ((i % 20)*180)-1700;
         objTable.position.y = -(Math.floor(i/20)*210)+900;
@@ -140,7 +141,6 @@
 
       const vector = new THREE.Vector3();
 
-      // SPHERE layout
       for(let i=0,l=objects.length;i<l;i++){
         const phi=Math.acos(-1+(2*i)/l);
         const theta=Math.sqrt(l*Math.PI)*phi;
@@ -151,7 +151,6 @@
         targets.sphere.push(object);
       }
 
-      // HELIX layout
       for(let i=0,l=objects.length;i<l;i++){
         const theta=i*0.175+(i%2===0?0:Math.PI);
         const y=-(i*10)+600;
@@ -164,7 +163,6 @@
         targets.helix.push(object);
       }
 
-      // GRID layout
       for(let i=0;i<objects.length;i++){
         const object=new THREE.Object3D();
         object.position.x=((i%5)*400)-800;
@@ -173,7 +171,25 @@
         targets.grid.push(object);
       }
 
-      // Renderer & controls
+      const radius = 800;
+
+      const pyramidPositions = [
+        new THREE.Vector3( 1,  1,  1),
+        new THREE.Vector3(-1, -1,  1),
+        new THREE.Vector3(-1,  1, -1),
+        new THREE.Vector3( 1, -1, -1),
+      ];
+
+      pyramidPositions.forEach(p => p.normalize().multiplyScalar(radius));
+
+      for (let i = 0; i < objects.length; i++) {
+        const object = new THREE.Object3D();
+        const p = pyramidPositions[i % 4];
+        object.position.set(p.x, p.y, p.z);
+        object.lookAt(0, 0, 0);
+        targets.pyramid.push(object);
+      }
+
       renderer = new CSS3DRenderer();
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.getElementById('container').appendChild(renderer.domElement);
@@ -185,6 +201,8 @@
       document.getElementById('sphere').addEventListener('click', ()=>transform(targets.sphere,2000));
       document.getElementById('helix').addEventListener('click', ()=>transform(targets.helix,2000));
       document.getElementById('grid').addEventListener('click', ()=>transform(targets.grid,2000));
+      document.getElementById('pyramid').addEventListener('click', ()=>transform(targets.pyramid,2000));
+
 
       transform(targets.table,2000);
       window.addEventListener('resize', onWindowResize);
