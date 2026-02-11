@@ -171,24 +171,55 @@
         targets.grid.push(object);
       }
 
-      const radius = 800;
+     // 5. TRUE LAYERED TETRAHEDRON PYRAMID
 
-      const pyramidPositions = [
-        new THREE.Vector3( 1,  1,  1),
-        new THREE.Vector3(-1, -1,  1),
-        new THREE.Vector3(-1,  1, -1),
-        new THREE.Vector3( 1, -1, -1),
-      ];
+const size = 900;
+const layers = 10; // lebih besar = lagi detail
 
-      pyramidPositions.forEach(p => p.normalize().multiplyScalar(radius));
+const v0 = new THREE.Vector3( 1,  1,  1).normalize().multiplyScalar(size);
+const v1 = new THREE.Vector3(-1, -1,  1).normalize().multiplyScalar(size);
+const v2 = new THREE.Vector3(-1,  1, -1).normalize().multiplyScalar(size);
+const v3 = new THREE.Vector3( 1, -1, -1).normalize().multiplyScalar(size);
 
-      for (let i = 0; i < objects.length; i++) {
-        const object = new THREE.Object3D();
-        const p = pyramidPositions[i % 4];
-        object.position.set(p.x, p.y, p.z);
-        object.lookAt(0, 0, 0);
-        targets.pyramid.push(object);
-      }
+const faces = [
+  [v0, v1, v2],
+  [v0, v1, v3],
+  [v0, v2, v3],
+  [v1, v2, v3]
+];
+
+let index = 0;
+
+for (let f = 0; f < 4; f++) {
+
+  for (let i = 0; i <= layers; i++) {
+
+    for (let j = 0; j <= layers - i; j++) {
+
+      if (index >= objects.length) break;
+
+      const object = new THREE.Object3D();
+
+      const a = i / layers;
+      const b = j / layers;
+      const c = 1 - a - b;
+
+      const pos = new THREE.Vector3()
+        .add(faces[f][0].clone().multiplyScalar(a))
+        .add(faces[f][1].clone().multiplyScalar(b))
+        .add(faces[f][2].clone().multiplyScalar(c));
+
+      object.position.copy(pos);
+      object.lookAt(0, 0, 0);
+
+      targets.pyramid.push(object);
+
+      index++;
+    }
+  }
+}
+
+
 
       renderer = new CSS3DRenderer();
       renderer.setSize(window.innerWidth, window.innerHeight);
